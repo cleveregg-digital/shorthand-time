@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-01-29
+
+### Other
+- chore: update release workflow to use PAT token for authentication (6e284b5)
+
+
+
 ## [1.0.0] - 2026-01-29
 
 ### Added
@@ -20,5 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PHPStan level 9 compliance
 - 100% mutation testing score with Infection
 
-[Unreleased]: https://github.com/cleveregg-digital/shorthand-time/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/cleveregg-digital/shorthand-time/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/cleveregg-digital/shorthand-time/compare/v1.0.2...v1.0.3
 [1.0.0]: https://github.com/cleveregg-digital/shorthand-time/releases/tag/v1.0.0
