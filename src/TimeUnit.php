@@ -108,22 +108,20 @@ enum TimeUnit: string
      */
     public function label(bool $plural = false): string
     {
-        $label = match ($this) {
-            self::NANOSECOND => 'nanosecond',
-            self::MICROSECOND => 'microsecond',
-            self::MILLISECOND => 'millisecond',
-            self::SECOND => 'second',
-            self::MINUTE => 'minute',
-            self::HOUR => 'hour',
-            self::DAY => 'day',
-            self::WEEK => 'week',
-            self::MONTH => 'month',
-            self::YEAR => 'year',
-            self::DECADE => 'decade',
-            self::CENTURY => 'century',
+        return match ($this) {
+            self::NANOSECOND => $plural ? 'nanoseconds' : 'nanosecond',
+            self::MICROSECOND => $plural ? 'microseconds' : 'microsecond',
+            self::MILLISECOND => $plural ? 'milliseconds' : 'millisecond',
+            self::SECOND => $plural ? 'seconds' : 'second',
+            self::MINUTE => $plural ? 'minutes' : 'minute',
+            self::HOUR => $plural ? 'hours' : 'hour',
+            self::DAY => $plural ? 'days' : 'day',
+            self::WEEK => $plural ? 'weeks' : 'week',
+            self::MONTH => $plural ? 'months' : 'month',
+            self::YEAR => $plural ? 'years' : 'year',
+            self::DECADE => $plural ? 'decades' : 'decade',
+            self::CENTURY => $plural ? 'centuries' : 'century',
         };
-
-        return $plural ? $label . 's' : $label;
     }
 
     /**

@@ -460,36 +460,36 @@ final class TimeUnitTest extends TestCase
 
     #[Test]
     #[DataProvider('labelProvider')]
-    public function labelReturnsSingularForm(TimeUnit $unit, string $expected): void
+    public function labelReturnsSingularForm(TimeUnit $unit, string $singular, string $plural): void
     {
-        $this->assertSame($expected, $unit->label());
+        $this->assertSame($singular, $unit->label());
     }
 
     #[Test]
     #[DataProvider('labelProvider')]
-    public function labelReturnsPluralForm(TimeUnit $unit, string $singular): void
+    public function labelReturnsPluralForm(TimeUnit $unit, string $singular, string $plural): void
     {
-        $this->assertSame($singular . 's', $unit->label(true));
+        $this->assertSame($plural, $unit->label(true));
     }
 
     /**
-     * @return array<string, array{TimeUnit, string}>
+     * @return array<string, array{TimeUnit, string, string}>
      */
     public static function labelProvider(): array
     {
         return [
-            'nanosecond' => [TimeUnit::NANOSECOND, 'nanosecond'],
-            'microsecond' => [TimeUnit::MICROSECOND, 'microsecond'],
-            'millisecond' => [TimeUnit::MILLISECOND, 'millisecond'],
-            'second' => [TimeUnit::SECOND, 'second'],
-            'minute' => [TimeUnit::MINUTE, 'minute'],
-            'hour' => [TimeUnit::HOUR, 'hour'],
-            'day' => [TimeUnit::DAY, 'day'],
-            'week' => [TimeUnit::WEEK, 'week'],
-            'month' => [TimeUnit::MONTH, 'month'],
-            'year' => [TimeUnit::YEAR, 'year'],
-            'decade' => [TimeUnit::DECADE, 'decade'],
-            'century' => [TimeUnit::CENTURY, 'century'],
+            'nanosecond' => [TimeUnit::NANOSECOND, 'nanosecond', 'nanoseconds'],
+            'microsecond' => [TimeUnit::MICROSECOND, 'microsecond', 'microseconds'],
+            'millisecond' => [TimeUnit::MILLISECOND, 'millisecond', 'milliseconds'],
+            'second' => [TimeUnit::SECOND, 'second', 'seconds'],
+            'minute' => [TimeUnit::MINUTE, 'minute', 'minutes'],
+            'hour' => [TimeUnit::HOUR, 'hour', 'hours'],
+            'day' => [TimeUnit::DAY, 'day', 'days'],
+            'week' => [TimeUnit::WEEK, 'week', 'weeks'],
+            'month' => [TimeUnit::MONTH, 'month', 'months'],
+            'year' => [TimeUnit::YEAR, 'year', 'years'],
+            'decade' => [TimeUnit::DECADE, 'decade', 'decades'],
+            'century' => [TimeUnit::CENTURY, 'century', 'centuries'],
         ];
     }
 
