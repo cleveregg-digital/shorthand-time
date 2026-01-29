@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -38,7 +39,108 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Extract changelog for version
+      - name: Get previous tag
+        id: prev_tag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          echo "PREV_TAG=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: Get commit log since last tag
+        id: commits
+        run: |
+          if [ -n "${{ steps.prev_tag.outputs.PREV_TAG }}" ]; then
+            COMMITS=$(git log ${{ steps.prev_tag.outputs.PREV_TAG }}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          else
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          echo "COMMITS<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog summary with GitHub Copilot
+        id: summary
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMITS="${{ steps.commits.outputs.COMMITS }}"
+
+          SUMMARY=$(gh copilot suggest -t shell "Summarize these git commits into a changelog with sections for Added, Changed, Fixed, Removed (only include sections that apply). Be concise. Commits: $COMMITS" 2>/dev/null || echo "$COMMITS")
+
+          # Fallback: categorize commits automatically if copilot fails
+          if [ "$SUMMARY" = "$COMMITS" ]; then
+            ADDED=$(echo "$COMMITS" | grep -iE "^- (add|feat|new|implement)" || true)
+            CHANGED=$(echo "$COMMITS" | grep -iE "^- (update|change|refactor|improve)" || true)
+            FIXED=$(echo "$COMMITS" | grep -iE "^- (fix|bug|patch|correct)" || true)
+            REMOVED=$(echo "$COMMITS" | grep -iE "^- (remove|delete|drop)" || true)
+            OTHER=$(echo "$COMMITS" | grep -ivE "^- (add|feat|new|implement|update|change|refactor|improve|fix|bug|patch|correct|remove|delete|drop)" || true)
+
+            SUMMARY=""
+            [ -n "$ADDED" ] && SUMMARY="${SUMMARY}### Added\n${ADDED}\n\n"
+            [ -n "$CHANGED" ] && SUMMARY="${SUMMARY}### Changed\n${CHANGED}\n\n"
+            [ -n "$FIXED" ] && SUMMARY="${SUMMARY}### Fixed\n${FIXED}\n\n"
+            [ -n "$REMOVED" ] && SUMMARY="${SUMMARY}### Removed\n${REMOVED}\n\n"
+            [ -n "$OTHER" ] && SUMMARY="${SUMMARY}### Other\n${OTHER}\n\n"
+          fi
+
+          echo "SUMMARY<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          DATE=$(date +%Y-%m-%d)
+          SUMMARY="${{ steps.summary.outputs.SUMMARY }}"
+
+          # Create new changelog entry
+          NEW_ENTRY="## [${VERSION}] - ${DATE}\n\n${SUMMARY}"
+
+          # Insert after [Unreleased] section
+          awk -v entry="$NEW_ENTRY" '
+            /^## \[Unreleased\]/ {
+              print
+              print ""
+              print entry
+              next
+            }
+            { print }
+          ' CHANGELOG.md > CHANGELOG.tmp.md
+          mv CHANGELOG.tmp.md CHANGELOG.md
+
+          # Update links at bottom of file
+          PREV_TAG="${{ steps.prev_tag.outputs.PREV_TAG }}"
+          REPO="cleveregg-digital/shorthand-time"
+
+          if [ -n "$PREV_TAG" ]; then
+            # Update unreleased link and add new version link
+            sed -i "s|\[Unreleased\]:.*|[Unreleased]: https://github.com/${REPO}/compare/v${VERSION}...HEAD|" CHANGELOG.md
+
+            # Add new version link if not exists
+            if ! grep -q "\[${VERSION}\]:" CHANGELOG.md; then
+              sed -i "/\[Unreleased\]:/a [${VERSION}]: https://github.com/${REPO}/compare/${PREV_TAG}...v${VERSION}" CHANGELOG.md
+            fi
+          else
+            sed -i "s|\[Unreleased\]:.*|[Unreleased]: https://github.com/${REPO}/compare/v${VERSION}...HEAD|" CHANGELOG.md
+            if ! grep -q "\[${VERSION}\]:" CHANGELOG.md; then
+              sed -i "/\[Unreleased\]:/a [${VERSION}]: https://github.com/${REPO}/releases/tag/v${VERSION}" CHANGELOG.md
+            fi
+          fi
+
+      - name: Update composer.json version
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          jq --arg version "$VERSION" '.version = $version' composer.json > composer.tmp.json
+          mv composer.tmp.json composer.json
+
+      - name: Commit version and changelog update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add composer.json CHANGELOG.md
+          git diff --staged --quiet || git commit -m "chore: release v${{ steps.version.outputs.VERSION }}"
+          git push origin main
+
+      - name: Extract changelog for release notes
         id: changelog
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
