@@ -6,7 +6,7 @@ A simple PHP package for time unit conversions with an intuitive enum-based API.
 
 ## Requirements
 
-- PHP 8.1 or higher
+- PHP 8.2 or higher
 
 ## Installation
 
@@ -170,7 +170,7 @@ All pull requests must pass the following automated checks:
 
 | Check | Requirement |
 |-------|-------------|
-| **Tests** | All tests passing on PHP 8.1, 8.2, 8.3, 8.4 |
+| **Tests** | All tests passing on PHP 8.2, 8.3, 8.4 |
 | **PHPStan** | Level 9 with no errors |
 | **Coverage** | 100% line coverage |
 | **Mutation Testing** | 100% mutation score |
