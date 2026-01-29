@@ -1,0 +1,37 @@
+{
+    "$schema": "https://raw.githubusercontent.com/infection/infection/0.29.0/resources/schema.json",
+    "source": {
+        "directories": ["src"]
+    },
+    "logs": {
+        "text": "infection.log",
+        "html": "infection.html",
+        "summary": "infection-summary.log"
+    },
+    "mutators": {
+        "@default": true,
+        // Exclude rounding mutations on convert() - floor/ceil/round are
+        // semantically equivalent for whole number detection
+        "RoundingFamily": {
+            "ignore": [
+                "CleverEggDigital\\ShorthandTime\\TimeUnit::convert"
+            ]
+        },
+        // Exclude boundary mutations - we never test with PHP_INT_MAX/MIN
+        // values as they exceed realistic time conversions (century in ns = 3.15e18)
+        "LessThanOrEqualTo": {
+            "ignoreSourceCodeByRegex": [
+                ".*PHP_INT_MAX.*"
+            ]
+        },
+        "GreaterThanOrEqualTo": {
+            "ignoreSourceCodeByRegex": [
+                ".*PHP_INT_MIN.*"
+            ]
+        }
+    },
+    "minMsi": 100,
+    "minCoveredMsi": 100,
+    "testFramework": "phpunit",
+    "testFrameworkOptions": "--testsuite=default"
+}
