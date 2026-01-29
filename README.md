@@ -191,6 +191,14 @@ composer install
 composer ci
 ```
 
+## Versioning
+
+This package follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+- **MAJOR** version for incompatible API changes
+- **MINOR** version for backwards-compatible new functionality
+- **PATCH** version for backwards-compatible bug fixes
+
 ## License
 
 This package is open-sourced software licensed under the [MIT license](LICENSE).
