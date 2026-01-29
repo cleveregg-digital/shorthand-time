@@ -1,6 +1,7 @@
 {
     "name": "cleveregg-digital/shorthand-time",
     "description": "A simple PHP package for time unit conversions with an intuitive enum-based API",
+    "version": "1.0.0",
     "type": "library",
     "license": "MIT",
     "authors": [
